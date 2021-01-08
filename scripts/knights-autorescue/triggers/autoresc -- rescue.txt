@@ -1,0 +1,22 @@
+person1 = args[1];
+person2 = args[2];
+
+function rescue(target) {
+  lowercaseTarget = target.toLowerCase();
+  gwc.connection.send('!rescue ' + lowercaseTarget, true);
+}
+
+if (gwc.userdata.rescuetargets.targets.length != 0) {
+  if (gwc.userdata.rescuetargets.targets.includes(person1)) {
+    rescue(person1);
+    setTimeout(rescue, 6000, person1);
+    //^Uncomment above code if you want it.
+    //This is requested by Ouly to ensure a rescue but has a
+    //six-second delay to avoid being spammy.
+    return;
+  } else if (gwc.userdata.rescuetargets.targets.includes(person2)) {
+    rescue(person2);
+    setTimeout(rescue, 6000, person2);
+    return;
+  }
+}

@@ -1,0 +1,83 @@
+function noNameErr() {
+  gwc.output.append("You did not enter a name.");
+  gwc.output.append("Usage: autorescue <add/remove (name)>");
+}
+
+function checkIfUpperCase(string) {
+  //This function checks if the first letter of the entered
+  //name is upper case. If not, it uppercases it.
+  //This is necessary because the trigger is case sensitive.
+  if (string.charAt(0) == string.charAt(0).toUpperCase()) {
+    return string;
+  } else {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  }
+}
+
+if (typeof gwc.userdata.rescuetargets == 'undefined') {
+  //This creates your list if not yet existing.
+  gwc.userdata.rescuetargets = {
+    targets: []
+  };
+}
+
+if (args[1] == 'add') {
+  if (typeof args[2] != 'undefined') {
+    parseTargetString = args[2];
+    theTrueTargetString = checkIfUpperCase(parseTargetString);
+    if (gwc.userdata.rescuetargets.targets.includes(theTrueTargetString) != true) {
+      gwc.userdata.rescuetargets.targets.push(theTrueTargetString);
+      gwc.output.append(checkIfUpperCase(theTrueTargetString) + " has been added into the list of rescue targets.");
+      return;
+    } else {
+      gwc.output.append("That name is in the list of rescue targets already.");
+      return;
+    }
+  } else {
+    noNameErr();
+    return;
+  }
+}
+
+if (args[1] == 'remove') {
+  if (typeof args[2] != 'undefined') {
+    parseTargetString = args[2];
+    theTrueTargetString = checkIfUpperCase(parseTargetString);
+    if (gwc.userdata.rescuetargets.targets.includes(theTrueTargetString) == true) {
+      nameIndex = gwc.userdata.rescuetargets.targets.indexOf(theTrueTargetString);
+      gwc.userdata.rescuetargets.targets.splice(nameIndex, 1);
+      gwc.output.append(theTrueTargetString + " has been removed from the list of rescue targets.");
+      return;
+    } else {
+      gwc.output.append("That name is not in the list of rescue targets.");
+      return;
+    }
+  } else {
+    noNameErr();
+    return;
+  }
+}
+
+if (args[1] == 'list') {
+  if (gwc.userdata.rescuetargets.targets.length != 0) {
+    array = gwc.userdata.rescuetargets.targets;
+    listLength = array.length;
+    gwc.output.append("Here are your rescue targets:");
+    for (i = 0; i < listLength; i++) {
+      gwc.output.append("  " + array[i]);
+    }
+    return;
+  } else {
+    gwc.output.append("Rescue target list is empty.");
+    return;
+  }
+}
+
+if (args[1] == 'clear') {
+  listLength = gwc.userdata.rescuetargets.targets.length;
+  gwc.userdata.rescuetargets.targets.splice(0, listLength);
+  gwc.output.append("The list of rescue targets has been purged!");
+  gwc.output.append("Your one-time rescue script is now effectively OFF.");
+} else {
+  gwc.output.append("Usage: autorescue <add/remove (name)>/<list>/<clear>");
+}

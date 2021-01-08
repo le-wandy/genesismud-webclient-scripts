@@ -1,0 +1,153 @@
+//Command: log
+//Syntax help: <log start/stop>
+//NOTE: It cannot log commands from the player yet.
+//      If you happen to be disconnected while logging,
+//      it will continue logging once you reconnect.
+//      Logging cannot be stopped until you reconnect.
+//      Also, try not to reload your tab while logging.
+//      Reloading tabs will cause unsaved logs to be
+//      lost.
+//      It might also be good practice to switch off
+//      your logs before quitting.
+
+//Create the toggle variable if non-existent
+if (typeof logTextToggle == "undefined") {
+  logTextToggle = false;
+}
+
+function printNotice() {
+
+  gwc.output.append("//NOTE: It cannot log commands from the player yet.");
+  gwc.output.append("//      If you happen to be disconnected while logging,");
+  gwc.output.append("//      it will continue logging once you reconnect.");
+  gwc.output.append("//      Logging cannot be stopped until you reconnect.");
+  gwc.output.append("//      Also, try not to reload your tab while logging.");
+  gwc.output.append("//      Reloading tabs will cause unsaved logs to be");
+  gwc.output.append("//      lost.");
+  gwc.output.append("//      It might also be good practice to switch off");
+  gwc.output.append("//      your logs before quitting.");
+
+}
+
+//This function allows the log to be downloaded
+function download(blob, name) {
+
+  var url = URL.createObjectURL(blob),
+      div = document.createElement("div"),
+      anch = document.createElement("a");
+
+  document.body.appendChild(div);
+  div.appendChild(anch);
+
+  anch.innerHTML = "&nbsp;";
+  div.style.width = "0";
+  div.style.height = "0";
+  anch.href = url;
+  anch.download = name;
+
+  var ev = new MouseEvent("click", {});
+  anch.dispatchEvent(ev);
+  document.body.removeChild(div);
+
+}
+
+//Function to convert html characters in log
+function decodeHtml(html) {
+
+    var txt = document.createElement("textarea");
+    txt.innerHTML = html;
+    return txt.value;
+
+}
+
+if (args["*"] == 'start') {
+
+  //If logging is inactive, turn it on and do stuff...
+  if (logTextToggle == false) {
+
+    //Clear the array containing log lines for use
+    logTextArray = [];
+
+    //Time the start of the log
+    var logDate = new Date();
+    logTextArray.push("LOG STARTED: " + logDate);
+
+    //Toggle
+    logTextToggle = true;
+
+    //Let user know it has begun
+    gwc.output.append("====================");
+    gwc.output.color("yellow");
+    gwc.output.append("|   LOG STARTED    |");
+    gwc.output.color("yellow");
+    gwc.output.append("====================");
+    gwc.output.color("yellow");
+
+    printNotice();
+
+  //...otherwise say that it's already on
+  } else {
+
+    gwc.output.append("LOGGER IS ALREADY ACTIVE.");
+    gwc.output.color("yellow");
+
+  }
+
+} else if (args["*"] == "stop") {
+
+  //If logging is active, turn it off and do stuff...
+  if (logTextToggle) {
+
+    //Toggle
+    logTextToggle = false;
+
+    //Time the log end and file creation
+    var logDate = new Date();
+    logTextArray.push("LOG ENDED: " + logDate);
+
+    //Let user know it has ended
+    gwc.output.append("====================");
+    gwc.output.color("lime");
+    gwc.output.append("|    LOG ENDED     |");
+    gwc.output.color("lime");
+    gwc.output.append("====================");
+    gwc.output.color("lime");
+
+    //Convert html characters and turn array into string
+    logExport = decodeHtml(logTextArray.join("\n"));
+
+    //Create the text file as a BLOB
+    var blob = new Blob([logExport], {
+      type: "text/plain",
+      endings: "native"
+    });
+
+    //Download the file
+    logFilename = "GenesisMUD log " + logDate + ".txt";
+    download(blob, logFilename);
+
+  //...otherwise, say it's already inactive.
+  } else {
+
+    gwc.output.append("Logger is already inactive.");
+    gwc.output.color("lime");
+
+  }
+
+//If wrong syntax, let user know syntax and status.
+} else {
+
+  gwc.output.append("Usage: <log start/stop>");
+
+  if (logTextToggle) {
+    gwc.output.append("LOGGING IS ACTIVE.");
+    gwc.output.color("yellow");
+
+  } else {
+
+    gwc.output.append("Logging is not active.");
+    gwc.output.color("lime");
+
+  }
+
+}

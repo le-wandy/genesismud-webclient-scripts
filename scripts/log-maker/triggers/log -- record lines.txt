@@ -1,0 +1,97 @@
+//This function allows the log to be downloaded
+function download(blob, name) {
+
+  var url = URL.createObjectURL(blob),
+      div = document.createElement("div"),
+      anch = document.createElement("a");
+
+  document.body.appendChild(div);
+  div.appendChild(anch);
+
+  anch.innerHTML = "&nbsp;";
+  div.style.width = "0";
+  div.style.height = "0";
+  anch.href = url;
+  anch.download = name;
+
+  var ev = new MouseEvent("click", {});
+  anch.dispatchEvent(ev);
+  document.body.removeChild(div);
+
+}
+
+//Function to convert html characters in log
+function decodeHtml(html) {
+
+    var txt = document.createElement("textarea");
+    txt.innerHTML = html;
+    return txt.value;
+
+}
+
+//Should only record when logger is active.
+if (logTextToggle) {
+
+  //Create array if non-existent.
+  if (typeof logTextArray == 'undefined') {
+
+    logTextArray = [];
+
+    //gwc.output.append('Created array logTextArray.');
+    //gwc.output.color('blue');
+
+  //Stop log on quit if user forgot to stop log.
+  //Functionally similar to <log stop> except the
+  //difference in method of activation.
+  } else if (args["0"] == "Goodbye. Until next time.") {
+
+    //Toggle
+    logTextToggle = false;
+
+    //Time the log end and file creation
+    var logDate = new Date();
+    logTextArray.push("USER QUIT THE GAME, ENDING LOG.");
+    logTextArray.push("LOG ENDED: " + logDate);
+
+    //Let user know it has ended
+    gwc.output.append("====================");
+    gwc.output.color("lime");
+    gwc.output.append("|    LOG ENDED     |");
+    gwc.output.color("lime");
+    gwc.output.append("====================");
+    gwc.output.color("lime");
+
+    //Convert html characters and turn array into string
+    logExport = decodeHtml(logTextArray.join("\n"));
+
+    //Create the text file as a BLOB
+    var blob = new Blob([logExport], {
+      type: "text/plain",
+      endings: "native"
+    });
+
+    //Download the file
+    logFilename = "GenesisMUD log " + logDate + ".txt";
+    download(blob, logFilename);
+
+  }
+
+  //Get hours, minutes, and seconds for line timestamping.
+  logEntryDate = new Date();
+  logEntryHour = logEntryDate.getHours();
+  logEntryMinute = logEntryDate.getMinutes();
+  logEntrySecond = logEntryDate.getSeconds();
+
+  //Remove html tags from obvious exits for a cleaner log
+  //output.
+  logLine = args['0'];
+  logLine = logLine.replace(/<span class="exit">/g,"");
+  logLine = logLine.replace(/<\/span>/g,"");
+
+  //RECORD!
+  logTextArray.push("[" + logEntryHour + ":" + logEntryMinute + ":" + logEntrySecond + "] " + logLine);
+
+  //gwc.output.append('Line pushed into logTextArray.');
+  //gwc.output.color('blue');
+
+}
